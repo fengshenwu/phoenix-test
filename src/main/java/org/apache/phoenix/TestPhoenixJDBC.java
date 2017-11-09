@@ -29,18 +29,18 @@ public class TestPhoenixJDBC {
             con = DriverManager.getConnection("jdbc:phoenix:" + zk + ":2181");
             stmt = con.createStatement();
 
-//            stmt.executeUpdate("drop index  if exists  TEST_INDEX_1 on test");
-//            stmt.executeUpdate("drop index  if exists  TEST_INDEX_2 on test");
-//            stmt.executeUpdate("drop index   if exists TEST_INDEX_3 on test");
-//            stmt.executeUpdate("drop index   if exists  TEST_INDEX_4 on test");
-//            stmt.executeUpdate("drop table  if exists test ") ;
-//            stmt.executeUpdate("create table Test (k varchar not null primary key, c1 varchar," +
-//                    "c2 varchar,c3 varchar,c4 varchar,c5 varchar," +
-//                    "c6 varchar,c7 varchar,c8 varchar,c9 varchar,c10 varchar)  SALT_BUCKETS = 20");
-//            stmt.executeUpdate("CREATE INDEX TEST_INDEX_1 ON TEST(c1,c2) INCLUDE(k)  SALT_BUCKETS = 20");
-//            stmt.executeUpdate("CREATE INDEX TEST_INDEX_2 ON TEST(c4,c5,c6) INCLUDE(k)  SALT_BUCKETS = 20");
-//            stmt.executeUpdate("CREATE INDEX TEST_INDEX_3 ON TEST(c7,c8,c2) INCLUDE(k)  SALT_BUCKETS = 20");
-//            stmt.executeUpdate("CREATE INDEX TEST_INDEX_4 ON TEST(c5,c3,c9,c1) INCLUDE(k)  SALT_BUCKETS = 20");
+            stmt.executeUpdate("drop index  if exists  TEST_INDEX_1 on test");
+            stmt.executeUpdate("drop index  if exists  TEST_INDEX_2 on test");
+            stmt.executeUpdate("drop index   if exists TEST_INDEX_3 on test");
+            stmt.executeUpdate("drop index   if exists  TEST_INDEX_4 on test");
+            stmt.executeUpdate("drop table  if exists test ") ;
+            stmt.executeUpdate("create table Test (k varchar not null primary key, c1 varchar," +
+                    "c2 varchar,c3 varchar,c4 varchar,c5 varchar," +
+                    "c6 varchar,c7 varchar,c8 varchar,c9 varchar,c10 varchar)  SALT_BUCKETS = 20");
+            stmt.executeUpdate("CREATE INDEX TEST_INDEX_1 ON TEST(c1)  SALT_BUCKETS = 20");
+            stmt.executeUpdate("CREATE INDEX TEST_INDEX_2 ON TEST(c4,c5)  SALT_BUCKETS = 20");
+            stmt.executeUpdate("CREATE INDEX TEST_INDEX_3 ON TEST(c7,c8,c2)   SALT_BUCKETS = 20");
+            stmt.executeUpdate("CREATE INDEX TEST_INDEX_4 ON TEST(c5,c3,c9,c1)   SALT_BUCKETS = 20");
             stmt.close();
             con.close();
 
