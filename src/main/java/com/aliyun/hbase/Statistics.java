@@ -50,21 +50,35 @@ public class Statistics extends Thread {
         long t_min = -1;
         long qps = 0;
 
-        int p=0;
+        int p = 0;
         while (true) {
             PriorityQueue<Long> queue = new PriorityQueue<Long>();
             while (true) {
-                Time time = data.poll(5, TimeUnit.SECONDS);
+                Time time = data.poll(1, TimeUnit.SECONDS);
                 if (time != null) {
                     long timems = (time.time);
-                    if (starttime >= timems && starttime - 5000 < timems) {
+                    if (starttime >= timems && starttime - 1000 < timems) {
                         queue.add(time.interval);
                     } else {
-                        starttime = starttime + 5000;
+                        if (System.currentTimeMillis() - starttime <= 0) {
+                            break;
+                        }
+                        long sleep = 1000 - (System.currentTimeMillis() - starttime);
+                        if (sleep >= 0) {
+                            Thread.sleep(sleep);
+                        }
+                        starttime = starttime + 1000l;
                         break;
                     }
                 } else {
-                    starttime = starttime + 5000;
+                    if (System.currentTimeMillis() - starttime <= 0) {
+                        break;
+                    }
+                    long sleep = 1000 - (System.currentTimeMillis() - starttime);
+                    if (sleep >= 0) {
+                        Thread.sleep(sleep);
+                    }
+                    starttime = starttime + 1000l;
                     break;
                 }
             }
@@ -99,14 +113,16 @@ public class Statistics extends Thread {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String dateString = formatter.format(starttime);
 
-            if(p % 10 == 0) {
+            String now = formatter.format(System.currentTimeMillis());
 
-                System.out.printf("| %1$20s|%2$8s|%3$8s|%4$8s|%5$8s|%6$8s|%7$10s|%8$10s|%9$10s|\n",
-                        "time", "qps", "min(ms)", "avg(ms)", "%95(ms)", "%99(ms)", "%99.5(ms)", "%99.9(ms)", "max(ms)");
+            if (p % 10 == 0) {
+
+                System.out.printf("|%1$20s | %2$20s|%3$8s|%4$8s|%5$8s|%6$8s|%7$8s|%8$10s|%9$10s|%10$10s|\n",
+                        "now", "time", "qps", "min(ms)", "avg(ms)", "%95(ms)", "%99(ms)", "%99.5(ms)", "%99.9(ms)", "max(ms)");
             }
             p++;
 
-            System.out.printf("| %1$20s|%2$8d|%3$8d|%4$8d|%5$8d|%6$8d|%7$10d|%8$10d|%9$10d|\n",
+            System.out.printf("| %1$20s| %2$20s|%3$8d|%4$8d|%5$8d|%6$8d|%7$8d|%8$10d|%9$10d|%10$10d|\n", now,
                     dateString, qps, t_min, t_avg, t_95, t_99, t_995, t_999, t_max);
 
 

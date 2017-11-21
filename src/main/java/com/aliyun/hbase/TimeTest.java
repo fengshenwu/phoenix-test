@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by fengshen on 11/18/17.
@@ -20,13 +22,14 @@ public class TimeTest {
     private static final String CF_DEFAULT = "f1";
     public static final byte[] QUALIFIER = "c1".getBytes();
 
-    public static void main(String[] args) {
-        if (args.length != 3) {
-            System.out.println("please input zk threadnumber  drop");
+    public static void main(String[] args) throws IOException {
+        if (args.length != 4) {
+            System.out.println("please input zk threadnumber  drop regions");
             return;
         }
         String zk = args[0];
         int m = Integer.valueOf(args[1]);
+        int regions = Integer.valueOf(args[3]);
 
         Statistics statistics = new Statistics();
         statistics.start();
@@ -45,7 +48,7 @@ public class TimeTest {
                 tableDescriptor.addFamily(new HColumnDescriptor(CF_DEFAULT));
                 System.out.println("Creating table. ");
                 Admin admin = connection.getAdmin();
-                ArrayList<String> splits = GenHash.genHash(100);
+                ArrayList<String> splits = GenHash.genHash(regions);
                 byte[][] splitKeys = new byte[splits.size()][];
                 for (int i = 0; i < splits.size(); i++) {
                     splitKeys[i] = splits.get(i).getBytes();
@@ -66,12 +69,22 @@ public class TimeTest {
                 }
             }
         }
+        Configuration conf = HBaseConfiguration.create();
+        conf.set(HConstants.ZOOKEEPER_QUORUM, zk);
+        conf.set(HConstants.HBASE_RPC_TIMEOUT_KEY, "30");
+        conf.set(HConstants.HBASE_RPC_TIMEOUT_KEY, "30");
+        conf.set("hbase.client.pause", "50");
+        conf.set("hbase.client.retries.number", "30");
+        conf.set("hbase.rpc.timeout", "2000");
+        conf.set("hbase.client.operation.timeout", "3000");
+        conf.set("hbase.client.scanner.timeout.period", "10000");
+        ExecutorService executor = Executors.newFixedThreadPool(500);
         for (int i = 0; i < m; i++) {
-            TimeTest.Run r = new TimeTest.Run(zk, statistics);
-            r.run();
+            TimeTest.Run r = new TimeTest.Run(zk, statistics, executor, conf);
+            r.start();
         }
         try {
-            Thread.sleep(1000000);
+            Thread.sleep(1000000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -81,6 +94,8 @@ public class TimeTest {
     static class Run extends Thread {
         String zk = null;
         Statistics statistics;
+        ExecutorService executor;
+        Configuration conf;
 
         public static String getRandomString(int length) {
             String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -93,30 +108,24 @@ public class TimeTest {
             return sb.toString();
         }
 
-        public Run(String zk, Statistics statistics) {
+        public Run(String zk, Statistics statistics, ExecutorService executor, Configuration conf) {
             this.zk = zk;
             this.statistics = statistics;
+            this.executor = executor;
+            this.conf = conf;
         }
 
         public void run() {
-            Configuration conf = HBaseConfiguration.create();
-            conf.set(HConstants.ZOOKEEPER_QUORUM, zk);
-            conf.set(HConstants.HBASE_RPC_TIMEOUT_KEY,"30");
-            conf.set(HConstants.HBASE_RPC_TIMEOUT_KEY,"30");
-            conf.set("hbase.client.pause", "50");
-            conf.set("hbase.client.retries.number", "3");
-            conf.set("hbase.rpc.timeout", "2000");
-            conf.set("hbase.client.operation.timeout", "3000");
-            conf.set("hbase.client.scanner.timeout.period", "10000");
+
             Connection connection = null;
             try {
-                connection = ConnectionFactory.createConnection(conf);
-                Table table = connection.getTable(TableName.valueOf(TABLE_NAME));
+                connection = ConnectionFactory.createConnection(conf, executor);
 
+                Table table = connection.getTable(TableName.valueOf(TABLE_NAME));
                 long start = System.currentTimeMillis();
                 while (true) {
                     List<Put> puts = new ArrayList<Put>();
-                    for (int j = 0; j < 100; j++) {
+                    for (int j = 0; j < 1; j++) {
                         Put put = new Put(UUID.randomUUID().toString().getBytes());
                         put.addColumn(CF_DEFAULT.getBytes(), QUALIFIER, getRandomString(100).getBytes());
                         puts.add(put);

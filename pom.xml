@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.aliyun.phoenix</groupId>
             <artifactId>ali-phoenix-core</artifactId>
-            <version>4.11.0-AliHBase-1.1-0.1</version>
+            <version>4.11.0-AliHBase-1.1-0.2</version>
         </dependency>
     </dependencies>
     <build>
