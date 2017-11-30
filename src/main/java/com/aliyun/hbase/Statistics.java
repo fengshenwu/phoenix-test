@@ -54,85 +54,84 @@ public class Statistics extends Thread {
         while (true) {
             PriorityQueue<Long> queue = new PriorityQueue<Long>();
             while (true) {
-                Time time = data.poll(1, TimeUnit.SECONDS);
-                if (time != null) {
-                    long timems = (time.time);
-                    if (starttime >= timems && starttime - 1000 < timems) {
-                        queue.add(time.interval);
-                    } else {
-                        if (System.currentTimeMillis() - starttime <= 0) {
+
+                if (System.currentTimeMillis() - starttime >= 0 && System.currentTimeMillis() - starttime < 1000) {
+                    Thread.sleep(1);
+                } else if (System.currentTimeMillis() - starttime >= 1000) {
+                    starttime = starttime + 1000;
+                    break;
+                } else if (System.currentTimeMillis() - starttime < 0) {
+                    Thread.sleep(0);
+                }
+//                System.out.println(data.size());
+                while (true) {
+                    if (data.size() > 0) {
+                        Time time = data.poll(1, TimeUnit.MICROSECONDS);
+                        long timems = (time.time);
+                        if (starttime >= timems && starttime - 1000 < timems) {
+                            queue.add(time.interval);
+                        } else {
                             break;
                         }
-                        long sleep = 1000 - (System.currentTimeMillis() - starttime);
-                        if (sleep >= 0) {
-                            Thread.sleep(sleep);
-                        }
-                        starttime = starttime + 1000l;
+                    } else {
                         break;
                     }
-                } else {
-                    if (System.currentTimeMillis() - starttime <= 0) {
-                        break;
+                }
+            }
+
+            if (queue.size() > 0) {
+                long sum = 0;
+                long size = queue.size();
+                for (int i = 0; i < size; i++) {
+                    long v = queue.poll();
+                    if (i == 0) {
+                        t_min = v;
                     }
-                    long sleep = 1000 - (System.currentTimeMillis() - starttime);
-                    if (sleep >= 0) {
-                        Thread.sleep(sleep);
+                    if (i == size - 1) {
+                        t_max = v;
                     }
-                    starttime = starttime + 1000l;
-                    break;
+                    if (i == (size * 95 / 100) - 1) {
+                        t_95 = v;
+                    }
+                    if (i == (size * 99 / 100) - 1) {
+                        t_99 = v;
+                    }
+                    if (i == (size * 995 / 1000) - 1) {
+                        t_995 = v;
+                    }
+                    if (i == (size * 999 / 1000) - 1) {
+                        t_999 = v;
+                    }
+
+                    sum = sum + v;
                 }
+                if (size == 0) t_avg = 0;
+                else t_avg = sum / size;
+                qps = size;
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = formatter.format(starttime);
+
+                String now = formatter.format(System.currentTimeMillis());
+
+                if (p % 10 == 0) {
+
+                    System.out.printf("|%1$20s | %2$20s|%3$8s|%4$8s|%5$8s|%6$8s|%7$8s|%8$10s|%9$10s|%10$10s|\n",
+                            "now", "time", "qps", "min(ms)", "avg(ms)", "%95(ms)", "%99(ms)", "%99.5(ms)", "%99.9(ms)", "max(ms)");
+                }
+                p++;
+
+                System.out.printf("| %1$20s| %2$20s|%3$8d|%4$8d|%5$8d|%6$8d|%7$8d|%8$10d|%9$10d|%10$10d|\n", now,
+                        dateString, qps, t_min, t_avg, t_95, t_99, t_995, t_999, t_max);
+
+
+                t_avg = -1;
+                t_max = -1;
+                t_99 = -1;
+                t_95 = -1;
+                t_995 = -1;
+                t_999 = -1;
+                t_min = -1;
             }
-            long sum = 0;
-            long size = queue.size();
-            for (int i = 0; i < size; i++) {
-                long v = queue.poll();
-                if (i == 0) {
-                    t_min = v;
-                }
-                if (i == size - 1) {
-                    t_max = v;
-                }
-                if (i == (size * 95 / 100) - 1) {
-                    t_95 = v;
-                }
-                if (i == (size * 99 / 100) - 1) {
-                    t_99 = v;
-                }
-                if (i == (size * 995 / 1000) - 1) {
-                    t_995 = v;
-                }
-                if (i == (size * 999 / 1000) - 1) {
-                    t_999 = v;
-                }
-
-                sum = sum + v;
-            }
-            if (size == 0) t_avg = 0;
-            else t_avg = sum / size;
-            qps = size;
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String dateString = formatter.format(starttime);
-
-            String now = formatter.format(System.currentTimeMillis());
-
-            if (p % 10 == 0) {
-
-                System.out.printf("|%1$20s | %2$20s|%3$8s|%4$8s|%5$8s|%6$8s|%7$8s|%8$10s|%9$10s|%10$10s|\n",
-                        "now", "time", "qps", "min(ms)", "avg(ms)", "%95(ms)", "%99(ms)", "%99.5(ms)", "%99.9(ms)", "max(ms)");
-            }
-            p++;
-
-            System.out.printf("| %1$20s| %2$20s|%3$8d|%4$8d|%5$8d|%6$8d|%7$8d|%8$10d|%9$10d|%10$10d|\n", now,
-                    dateString, qps, t_min, t_avg, t_95, t_99, t_995, t_999, t_max);
-
-
-            t_avg = -1;
-            t_max = -1;
-            t_99 = -1;
-            t_95 = -1;
-            t_995 = -1;
-            t_999 = -1;
-            t_min = -1;
 
         }
     }

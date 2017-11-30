@@ -24,7 +24,7 @@ public class TimeTest {
 
     public static void main(String[] args) throws IOException {
         if (args.length != 4) {
-            System.out.println("please input zk threadnumber  drop regions");
+            System.out.println("please input zk threadnumber  drop regions  ");
             return;
         }
         String zk = args[0];
@@ -85,6 +85,7 @@ public class TimeTest {
         }
         try {
             Thread.sleep(1000000000);
+            System.out.println("exit");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -127,7 +128,7 @@ public class TimeTest {
                     List<Put> puts = new ArrayList<Put>();
                     for (int j = 0; j < 1; j++) {
                         Put put = new Put(UUID.randomUUID().toString().getBytes());
-                        put.addColumn(CF_DEFAULT.getBytes(), QUALIFIER, getRandomString(100).getBytes());
+                        put.addColumn(CF_DEFAULT.getBytes(), QUALIFIER, getRandomString(1024).getBytes());
                         puts.add(put);
                     }
                     table.put(puts);
@@ -138,6 +139,7 @@ public class TimeTest {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
+                System.out.println("thread exit");
                 if (connection != null) {
                     try {
                         connection.close();

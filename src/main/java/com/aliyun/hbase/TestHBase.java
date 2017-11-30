@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public class TestHBase {
 
-    private static final String TABLE_NAME = "test_hbase";
+    private static final String TABLE_NAME = "tp";
     private static final String CF_DEFAULT = "f1";
     public static final byte[] QUALIFIER = "c1".getBytes();
 
@@ -31,15 +31,15 @@ public class TestHBase {
         config.set(HConstants.ZOOKEEPER_QUORUM, zk);
         Connection connection = null;
         try {
-//            connection = ConnectionFactory.createConnection(config);
-//            connection.getAdmin().disableTable(TableName.valueOf(TABLE_NAME));
-//            connection.getAdmin().deleteTable(TableName.valueOf(TABLE_NAME));
-//            HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(TABLE_NAME));
-//            tableDescriptor.addFamily(new HColumnDescriptor(CF_DEFAULT));
-//            System.out.print("Creating table. ");
-//            Admin admin = connection.getAdmin();
-//            admin.createTable(tableDescriptor);
-//            System.out.println(" Done.");
+            connection = ConnectionFactory.createConnection(config);
+            connection.getAdmin().disableTable(TableName.valueOf(TABLE_NAME));
+            connection.getAdmin().deleteTable(TableName.valueOf(TABLE_NAME));
+            HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(TABLE_NAME));
+            tableDescriptor.addFamily(new HColumnDescriptor(CF_DEFAULT));
+            System.out.print("Creating table. ");
+            Admin admin = connection.getAdmin();
+            admin.createTable(tableDescriptor);
+            System.out.println(" Done.");
             System.out.println(UUID.randomUUID().toString().getBytes().length);
 
         } catch (Exception e) {
