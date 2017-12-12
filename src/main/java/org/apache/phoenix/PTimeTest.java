@@ -51,18 +51,25 @@ public class PTimeTest {
                 con = DriverManager.getConnection("jdbc:phoenix:" + zk + ":2181", info);
                 stmt = con.createStatement();
 
-                stmt.executeUpdate("drop index  if exists  TEST_INDEX_1 on test");
-                stmt.executeUpdate("drop index  if exists  TEST_INDEX_2 on test");
-                stmt.executeUpdate("drop index   if exists TEST_INDEX_3 on test");
-                stmt.executeUpdate("drop index   if exists  TEST_INDEX_4 on test");
-                stmt.executeUpdate("drop table  if exists test ");
-                stmt.executeUpdate("create table Test (k varchar not null primary key, c1 varchar," +
+                stmt.executeUpdate("drop index  if exists  TEST1_INDEX_1 on test1");
+                stmt.executeUpdate("drop index  if exists  TEST1_INDEX_2 on test1");
+                stmt.executeUpdate("drop index   if exists TEST1_INDEX_3 on test1");
+                stmt.executeUpdate("drop index   if exists  TEST1_INDEX_4 on test1");
+                stmt.executeUpdate("drop table  if exists test1 ");
+                stmt.executeUpdate("create table Test1 (k varchar not null primary key, c1 varchar," +
                         "c2 varchar,c3 varchar,c4 varchar,c5 varchar," +
-                        "c6 varchar,c7 varchar,c8 varchar,c9 varchar,c10 varchar)  SALT_BUCKETS = " + regions);
-                stmt.executeUpdate("CREATE INDEX TEST_INDEX_1 ON TEST(c1)  SALT_BUCKETS = " + regions);
-                stmt.executeUpdate("CREATE INDEX TEST_INDEX_2 ON TEST(c4,c5)  SALT_BUCKETS = " + regions);
-                stmt.executeUpdate("CREATE INDEX TEST_INDEX_3 ON TEST(c7,c8,c2)   SALT_BUCKETS = " + regions);
-                stmt.executeUpdate("CREATE INDEX TEST_INDEX_4 ON TEST(c5,c3,c9,c1)   SALT_BUCKETS = " + regions);
+                        "c6 varchar,c7 varchar,c8 varchar,c9 varchar,c10 varchar)  SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_1 ON TEST1(c1)  SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_2 ON TEST1(c2)  SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_3 ON TEST1(c3)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_4 ON TEST1(c4)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_5 ON TEST1(c5)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_6 ON TEST1(c6)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_7 ON TEST1(c7)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_8 ON TEST1(c8)   SALT_BUCKETS = " + 245);
+                stmt.executeUpdate("CREATE INDEX TEST1_INDEX_9 ON TEST1(c9)   SALT_BUCKETS = " + 245);
+
+
                 stmt.close();
                 con.close();
             }
@@ -87,14 +94,14 @@ public class PTimeTest {
         try
 
         {
-            Thread.sleep(1000000000);
-            System.out.println("exit");
+            while (true) Thread.sleep(1000000000);
         } catch (
                 InterruptedException e)
 
         {
             e.printStackTrace();
         }
+        System.out.println("1exit");
 
     }
 
@@ -132,9 +139,10 @@ public class PTimeTest {
 
 //                stmt.executeUpdate("select /*+ INDEX(test TEST_INDEX_1) */ *  from test where c1 like '546204f%'");
 
+                int i = 0;
                 while (true) {
                     long start = System.currentTimeMillis();
-                    stmt.executeUpdate("upsert into Test values ('" + UUID.randomUUID()
+                    stmt.executeUpdate("upsert into Test1 values ('" + UUID.randomUUID()
                             + "','" + UUID.randomUUID() + "','" + UUID.randomUUID()
                             + "','" + UUID.randomUUID() + "','" + UUID.randomUUID()
                             + "','" + UUID.randomUUID() + "','" + UUID.randomUUID()
@@ -143,9 +151,11 @@ public class PTimeTest {
                             + "')");
                     con.commit();
                     statistics.put(System.currentTimeMillis() - start);
+
                 }
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                System.out.println("ex");
                 e.printStackTrace();
             } finally {
                 System.out.println("thread exit");
