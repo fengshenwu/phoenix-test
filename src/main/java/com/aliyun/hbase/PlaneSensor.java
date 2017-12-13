@@ -3,6 +3,7 @@ package com.aliyun.hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.MD5Hash;
 import org.apache.phoenix.GenHash;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class PlaneSensor {
         String zk = args[0];
         int size = Integer.valueOf(args[2]);
         int m = Integer.valueOf(args[1]);
+        System.out.println("m:" + m);
         Statistics statistics = new Statistics();
         statistics.start();
         Configuration config = HBaseConfiguration.create();
@@ -43,6 +45,7 @@ public class PlaneSensor {
                 }
                 connection.getAdmin().deleteTable(TableName.valueOf(TABLE_NAME));
             }
+
             HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(TABLE_NAME));
             tableDescriptor.addFamily(new HColumnDescriptor(CF_DEFAULT));
             System.out.print("Creating table. ");
@@ -71,7 +74,7 @@ public class PlaneSensor {
         }
         for (int i = 0; i < m; i++) {
             PlaneSensor.Run r = new PlaneSensor.Run(zk, statistics, size);
-            r.run();
+            r.start();
         }
 
 
@@ -107,28 +110,39 @@ public class PlaneSensor {
             Configuration config = HBaseConfiguration.create();
             config.set(HConstants.ZOOKEEPER_QUORUM, zk);
             Connection connection = null;
+            System.out.println("add thread");
+
             try {
                 connection = ConnectionFactory.createConnection(config);
                 Table table = connection.getTable(TableName.valueOf(TABLE_NAME));
 
                 while (true) {
                     long start = System.nanoTime();
-                    long end = System.nanoTime();
-                    statistics.put(end - start);
-                    start = System.nanoTime();
                     List<Put> puts = new ArrayList<Put>();
-
-                    System.out.println("add 1");
-                    Put put = new Put(UUID.randomUUID().toString().getBytes());
-                    for (int j = 0; j < 10000; j++) {
-                        put.addColumn(CF_DEFAULT.getBytes(), (QUALIFIER + String.valueOf(j)).getBytes(), getRandomString(size).getBytes());
+                    int p = 0;
+                    for (int j = 0; j < 40000; j++) {
+                        String planeNo = "plane1";
+                        String SensorNo = String.valueOf(j);
+                        String rowkey = MD5Hash.getMD5AsHex((planeNo + SensorNo).getBytes()).substring(0, 5) + planeNo + SensorNo + "j" + System.currentTimeMillis();
+                        Put put = new Put(rowkey.getBytes());
+                        String value = getRandomString(size); // double double double double double  1000个 压缩
+                        put.addColumn(CF_DEFAULT.getBytes(), QUALIFIER, value.getBytes());
+                        puts.add(put);
+                        if (p++ % 500 == 0) {
+                            System.out.println("add 11");
+                            table.put(puts);
+                        }
                     }
-                    puts.add(put);
-                    table.put(puts);
+
                 }
-            } catch (Exception e) {
+            } catch (
+                    Exception e)
+
+            {
                 e.printStackTrace();
-            } finally {
+            } finally
+
+            {
                 if (connection != null) {
                     try {
                         connection.close();
