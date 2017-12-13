@@ -123,7 +123,7 @@ public class PlaneSensor {
                     for (int j = 0; j < 40000; j++) {
                         String planeNo = "plane1";
                         String SensorNo = String.valueOf(j);
-                        String rowkey = MD5Hash.getMD5AsHex((planeNo + SensorNo).getBytes()).substring(0, 5) + planeNo + SensorNo + "j" + System.currentTimeMillis();
+                        String rowkey = MD5Hash.getMD5AsHex((planeNo + SensorNo).getBytes()).substring(0, 5) + planeNo + SensorNo + System.currentTimeMillis();
                         Put put = new Put(rowkey.getBytes());
                         String value = getRandomString(size); // double double double double double  1000个 压缩
                         put.addColumn(CF_DEFAULT.getBytes(), QUALIFIER, value.getBytes());
